@@ -1,0 +1,13 @@
+{
+  "name": "bg-hive-api",
+  "version": "0.1.0",
+  "description": "bg hive home api",
+  "main": "./hivehome.js",
+    "author": {
+        "name": "Adrian",
+        "email": ""
+    },
+  "dependencies": {
+    "restler": "3.x.x"
+  }
+}
