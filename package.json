@@ -2,7 +2,7 @@
   "name": "bg-hive-api",
   "version": "0.1.0",
   "description": "bg hive home api",
-  "main": "./hivehome.js",
+  "main": "./index.js",
     "author": {
         "name": "Adrian",
         "email": ""
