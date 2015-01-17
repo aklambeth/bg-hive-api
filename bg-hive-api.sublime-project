@@ -3,11 +3,7 @@
 	[
 		{
 			"follow_symlinks": true,
-			"path": "lib"
-		},
-		{
-			"follow_symlinks": true,
-			"path": "test"
+			"path": "."
 		}
 	]
 }
