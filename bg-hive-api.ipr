@@ -175,6 +175,10 @@
       <module fileurl="file://$PROJECT_DIR$/bg-hive-api.iml" filepath="$PROJECT_DIR$/bg-hive-api.iml" />
     </modules>
   </component>
+  <component name="ProjectPlainTextFileTypeManager">
+    <file url="file://$PROJECT_DIR$/hotwaterControl.js" />
+    <file url="file://$PROJECT_DIR$/hotwaterControl.js" />
+  </component>
   <component name="ProjectRootManager" version="2" languageLevel="JDK_1_6" assert-keyword="true" jdk-15="true">
     <output url="file://$PROJECT_DIR$/out" />
   </component>

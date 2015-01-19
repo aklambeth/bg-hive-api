@@ -23,6 +23,11 @@ function EventHandler()
             console.log(response);
             hive.Logout();
         });
+
+        controller.on('complete', function(response){
+            console.log(response);
+            hive.Logout();
+        });
     }
 }
 
@@ -31,7 +36,10 @@ hive.on('login', function(hubs){
             console.log('-> Got a controller');
             controller = thermostat;
             EventHandler();
-            controller.Control(controller.Mode.Schedule);
+
+            //var request = {control:{control:controller.Mode.Schedule}};
+
+            controller.SetState({targetTemperature:{temperatureUnit:'C', temperature:'19'}});
         })
 });
 
