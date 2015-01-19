@@ -8,6 +8,7 @@
         "email": ""
     },
   "dependencies": {
-    "restler": "3.x.x"
+    "config-node": "1.x.x",
+    "request" : "2.x.x"
   }
 }
