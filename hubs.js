@@ -1,15 +1,21 @@
 var request = require('request');
 var util = require('util');
+var EventEmitter = require('events').EventEmitter;
 var ClimateControl = require('./climateControl');
+var HotWaterControl = require('./hotwaterControl');
 
 module.exports = Hubs;
 
-Hubs.prototype.id = function() {
-    return this.context.id;
+function Hubs(context, hubId) {
+    this.context = context;
+    this.context.id = hubId;
+    this.FindController();
 }
 
-Hubs.prototype.HeatingController = function(eventHandler)
-{
+util.inherits(Hubs, EventEmitter);
+
+Hubs.prototype.FindController = function() {
+
     var self = this;
     var uri = this.context.uri + 'users/' + this.context.username + "/hubs/" + this.context.id + '/devices/HAHVACThermostatSLR2/only';
     var options = {
@@ -19,17 +25,32 @@ Hubs.prototype.HeatingController = function(eventHandler)
         method: 'GET'
     };
 
-    request(options, function (error, response, body) {
-        if (!error && response.statusCode == 200) {
-            eventHandler(new ClimateControl(self.context, JSON.parse(body)));
-        }
-        else {
-            console.log(response.statusCode + ' - ' + uri);
-        }
-    });
+    if (!this.context.controller) {
+
+        request(options, function (error, response, body) {
+            if (!error && response.statusCode == 200) {
+                var deviceId = JSON.parse(body);
+                self.context.controller = deviceId.id;
+                self.emit('complete', self.GetControllers());
+            }
+            else {
+                console.log(response.statusCode + ' - ' + uri);
+            }
+        });
+
+    }
+    else {
+        self.emit('complete', self.GetControllers());
+    }
 }
 
-function Hubs(context, hubId) {
-    this.context = context;
-    this.context.id = hubId;
+Hubs.prototype.GetControllers = function() {
+
+    var heatingController = new ClimateControl(this.context);
+    var hotwaterController = new HotWaterControl(this.context);
+
+    return {
+        HeatingController: heatingController,
+        HotWaterController: hotwaterController
+    }
 }

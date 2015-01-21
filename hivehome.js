@@ -2,9 +2,36 @@ var Hive = require('./index.js');
 var util = require('util');
 
 var hive = new Hive();
-var controller;
 
-function EventHandler()
+function HeatingEventHandler(controller)
+{
+    if (controller != undefined)
+    {
+        var Modes = controller.Mode;
+
+        controller.on('update', function(data){
+            console.log(data);
+            hive.Logout();
+        });
+
+        controller.on('accepted', function(){
+            controller.GetState();
+        });
+
+        controller.on('error', function(response){
+            console.log(response);
+            hive.Logout();
+        });
+
+        controller.on('complete', function(response){
+            console.log(response);
+            hive.Logout();
+        });
+    }
+}
+
+
+function HotWaterEventHandler(controller)
 {
     if (controller != undefined)
     {
@@ -31,16 +58,16 @@ function EventHandler()
     }
 }
 
-hive.on('login', function(hubs){
-        hubs[0].HeatingController(function(thermostat){
-            console.log('-> Got a controller');
-            controller = thermostat;
-            EventHandler();
 
-            //var request = {control:{control:controller.Mode.Schedule}};
+hive.on('login', function(controllers){
 
-            controller.SetState({targetTemperature:{temperatureUnit:'C', temperature:'19'}});
-        })
+    var heatingController = controllers.HeatingController;;
+    var hotwaterController = controllers.HotWaterController;
+
+    HeatingEventHandler(heatingController);
+    HotWaterEventHandler(hotwaterController);
+
+   heatingController.GetState(null);
 });
 
 hive.on('logout', function(){

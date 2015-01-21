@@ -6,9 +6,22 @@ var config = require('config-node')({
     ext: null, // spoil the fun, tell me which one it is ('' for directory). Improves performance.
     env: process.env.NODE_ENV || 'development' // set which one instead of smart defaults
 });
-var hub = require('./hubs');
+var Hub = require('./hubs');
 
-function Hive() {}
+function Hive() {
+
+    var context = {
+        "authToken":null,
+        "username" : config.credentials.username,
+        "userId" : null,
+        "uri" : config.api.v5,
+        "id":null,
+        "controller":null
+    }
+
+    this.context = context;
+
+}
 util.inherits(Hive, EventEmitter);
 
 Hive.prototype.Login = function() {
@@ -37,20 +50,19 @@ Hive.prototype.Login = function() {
 
             var j = request.jar();
             j.setCookie(request.cookie('ApiSession=' + data.ApiSession), config.api.v5);
+            self.context.authToken = j;
+            self.context.userId = data.userId;
 
-            var context = {
-                "authToken":j,
-                "username" : config.credentials.username,
-                "userId" : data.userId,
-                "uri" : config.api.v5
+            if (data.hubIds && data.hubIds.length > 0) {
+                self.context.id = data.hubIds[0];
+                new Hub(self.context, data.hubIds[0]).
+                    on('complete', function(controllers) {
+
+                        self.context.controller = this.context.controller;
+                        self.emit('login', controllers);
+
+                    });
             }
-
-            self.context = context;
-
-            for(var i = 0; i < data.hubIds.length;i++){
-                hubs[i] = new hub(context, data.hubIds[i]);
-            }
-            self.emit('login', hubs);
         }
         else {
             console.log(response.statusCode + ' - ' + uri);
