@@ -8,7 +8,6 @@
         "email": ""
     },
   "dependencies": {
-    "config-node": "1.x.x",
     "request" : "2.x.x",
     "async" : "0.9.x"
   }

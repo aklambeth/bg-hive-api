@@ -1,7 +1,7 @@
 var Hive = require('./index.js');
 var util = require('util');
 
-var hive = new Hive();
+var hive = new Hive("adrian@lambeth.org", "1396734046");
 
 function HeatingEventHandler(controller)
 {

@@ -1,20 +1,29 @@
 var request = require('request');
 var EventEmitter = require('events').EventEmitter;
 var util = require('util');
-var config = require('config-node')({
-    dir: 'config', // where to look for files
-    ext: null, // spoil the fun, tell me which one it is ('' for directory). Improves performance.
-    env: process.env.NODE_ENV || 'development' // set which one instead of smart defaults
-});
 var Hub = require('./hubs');
 
-function Hive() {
+var config = {
+
+    credentials : {
+        "username": '', "password": ''
+    },
+
+    api : {
+        "Hive": "https://api.bgchlivehome.co.uk/v5/"
+    }
+}
+
+function Hive(username, password) {
+
+    config.credentials.username = username;
+    config.credentials.password = password;
 
     var context = {
         "authToken":null,
         "username" : config.credentials.username,
         "userId" : null,
-        "uri" : config.api.v5,
+        "uri" : config.api.Hive,
         "id":null,
         "controller":null
     }
@@ -25,7 +34,7 @@ function Hive() {
 util.inherits(Hive, EventEmitter);
 
 Hive.prototype.Login = function() {
-    var uri = config.api.v5 + 'login';
+    var uri = config.api.Hive + 'login';
     var formdata = {
         "username": config.credentials.username,
         "password": config.credentials.password,
@@ -49,7 +58,7 @@ Hive.prototype.Login = function() {
             var data = JSON.parse(body);
 
             var j = request.jar();
-            j.setCookie(request.cookie('ApiSession=' + data.ApiSession), config.api.v5);
+            j.setCookie(request.cookie('ApiSession=' + data.ApiSession), config.api.Hive);
             self.context.authToken = j;
             self.context.userId = data.userId;
 
@@ -71,7 +80,7 @@ Hive.prototype.Login = function() {
 }
 
 Hive.prototype.Logout = function() {
-    var uri = config.api.v5 + 'logout';
+    var uri = config.api.Hive + 'logout';
     var self = this;
 
     var options = {
