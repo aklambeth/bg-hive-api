@@ -10,20 +10,31 @@ var config = {
     },
 
     api : {
-        "Hive": "https://api.bgchlivehome.co.uk/v5/"
+        "Hive": "https://api.bgchlivehome.co.uk/v5/",
+        "AlertMe" : "https://api.alertme.com/v5"
     }
 }
 
-function Hive(username, password) {
+function Hive(username, password, api) {
 
     config.credentials.username = username;
     config.credentials.password = password;
+
+    if (!api)
+        api = 'Hive';
+
+    var uri;
+    if (api == "AlertMe")
+        uri = config.api.AlertMe;
+    else
+        uri = config.api.Hive;
 
     var context = {
         "authToken":null,
         "username" : config.credentials.username,
         "userId" : null,
-        "uri" : config.api.Hive,
+        "uri" : uri,
+        "api" : api,
         "id":null,
         "controller":null
     }
