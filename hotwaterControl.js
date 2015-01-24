@@ -18,9 +18,9 @@ HotWaterControl.prototype.SetState = function(state)
 {
     var post = {hotwater:state};
 
-    this.Call(post);
+    this.Call(post, this.METHOD.Put);
 }
 
 HotWaterControl.prototype.GetState = function(){
-    this.Call({hotwater:null});
+    this.Call({hotwater:null}, this.METHOD.Put);
 }

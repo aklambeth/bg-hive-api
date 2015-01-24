@@ -13,9 +13,13 @@ function Widget(context)
 
 util.inherits(Widget, EventEmitter);
 
-Widget.prototype.Call = function(data) {
+Widget.prototype.METHOD = {Get:'GET', Put:'PUT', Post:'POST'}
+
+Widget.prototype.Call = function(data, method) {
         var self = this;
 
+        if (!method)
+            method = this.METHOD.Get;
 
         try {
 
@@ -44,12 +48,15 @@ Widget.prototype.Call = function(data) {
                     headers:{'User-Agent': 'bg-hive-api/0.1.0'},
                     jar:self.context.authToken,
                     form: req[key],
-                    method: 'PUT'
+                    method: method
                 };
 
                 request(options, function (error, response, body) {
                     if (!error && response.statusCode == 204) {
                         self.emit('accepted');
+                    }
+                    else if(!error && method == self.METHOD.Get && response.statusCode == 200) {
+                        self.emit('complete', JSON.parse(body));
                     }
                     else
                     {
@@ -84,7 +91,7 @@ Widget.prototype.Call = function(data) {
                 else if (err){
 
                     console.log(err.statusCode + ' - ' + uri);
-                    self.emitdata[widget]('error', err);
+                    self.emit('error', err);
 
                 }
                 else
