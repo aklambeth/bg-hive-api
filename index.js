@@ -75,13 +75,12 @@ Hive.prototype.Login = function() {
 
             if (data.hubIds && data.hubIds.length > 0) {
                 self.context.id = data.hubIds[0];
-                new Hub(self.context, data.hubIds[0]).
-                    on('complete', function(controllers) {
-
+                var hub = new Hub(self.context, data.hubIds[0]);
+                hub.on('complete', function(controllers) {
                         self.context.controller = this.context.controller;
                         self.emit('login', controllers);
-
-                    });
+                });
+                hub.FindController();
             }
         }
         else {

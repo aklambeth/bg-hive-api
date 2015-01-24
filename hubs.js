@@ -9,7 +9,6 @@ module.exports = Hubs;
 function Hubs(context, hubId) {
     this.context = context;
     this.context.id = hubId;
-    this.FindController();
 }
 
 util.inherits(Hubs, EventEmitter);
@@ -25,7 +24,7 @@ Hubs.prototype.FindController = function() {
         method: 'GET'
     };
 
-    if (!this.context.controller) {
+    //if (!this.context.controller) {
 
         request(options, function (error, response, body) {
             if (!error && response.statusCode == 200) {
@@ -38,10 +37,10 @@ Hubs.prototype.FindController = function() {
             }
         });
 
-    }
-    else {
-        self.emit('complete', self.GetControllers());
-    }
+    //}
+    //else {
+    //    self.emit('complete', self.GetControllers());
+    //}
 }
 
 Hubs.prototype.GetControllers = function() {

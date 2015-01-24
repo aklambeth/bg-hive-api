@@ -55,9 +55,9 @@ Widget.prototype.Call = function(data, method) {
                     if (!error && response.statusCode == 204) {
                         self.emit('accepted');
                     }
-                    else if(!error && method == self.METHOD.Get && response.statusCode == 200) {
-                        self.emit('complete', JSON.parse(body));
-                    }
+                    //else if(!error && method == self.METHOD.Get && response.statusCode == 200) {
+                    //    self.emit('complete', JSON.parse(body));
+                    //}
                     else
                     {
                         callback(response);
