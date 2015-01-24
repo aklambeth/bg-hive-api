@@ -16,12 +16,7 @@ HotWaterControl.prototype.Mode = { "Schedule":"SCHEDULE", "Manual":"MANUAL", "Bo
 HotWaterControl.prototype.State = { "On":"ON", "Off":"OFF"};
 HotWaterControl.prototype.SetState = function(state)
 {
-    var post = {
-            hotwater:{
-                    controls:{
-                        operation:state
-                    }
-            }};
+    var post = {hotwater:state};
 
     this.Call(post);
 }
