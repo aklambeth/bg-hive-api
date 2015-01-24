@@ -67,7 +67,9 @@ hive.on('login', function(controllers){
     HeatingEventHandler(heatingController);
     HotWaterEventHandler(hotwaterController);
 
-   heatingController.SetState({'controls\/schedule':null});
+
+    heatingController.SetState({"controls":{"operation":"SCHEDULE"}});
+
 });
 
 hive.on('logout', function(){
