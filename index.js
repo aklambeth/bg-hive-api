@@ -102,7 +102,10 @@ Hive.prototype.Logout = function() {
 
     request(options, function (error, response, body) {
         if (!error && response.statusCode == 204) {
-            self.context = undefined;
+            self.context.authToken = undefined;
+            self.context.controller = null;
+            self.context.id = null;
+            self.context.userId = null;
             self.emit('logout');
         }
         else {
