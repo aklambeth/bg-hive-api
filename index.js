@@ -2,6 +2,7 @@ var request = require('request');
 var EventEmitter = require('events').EventEmitter;
 var util = require('util');
 var Hub = require('./hubs');
+var connection = require('./Connection.js');
 
 var config = {
 
@@ -30,13 +31,8 @@ function Hive(username, password, api) {
         uri = config.api.Hive;
 
     var context = {
-        "authToken":null,
-        "username" : config.credentials.username,
-        "userId" : null,
-        "uri" : uri,
-        "api" : api,
-        "id":null,
-        "controller":null
+        user:undefined,
+        hub:undefined
     }
 
     this.context = context;
@@ -45,73 +41,100 @@ function Hive(username, password, api) {
 util.inherits(Hive, EventEmitter);
 
 Hive.prototype.Login = function() {
-    var uri = config.api.Hive + 'login';
-    var formdata = {
-        "username": config.credentials.username,
-        "password": config.credentials.password,
-        "caller": "HiveHome"
-    };
 
-    var hubs = {};
+    var loginTask = {
+        login:{
+            POST:{
+                "username": config.credentials.username,
+                "password": config.credentials.password,
+                "caller": "HiveHome"
+            }
+        }
+    }
+
+    //var hubs = {};
     var self = this;
 
-    console.log('->login - ' + uri );
+    //console.log('->login - ' + uri );
 
-    var options = {
-        url:uri,
-        headers:{'User-Agent': 'bg-hive-api/0.1.0'},
-        form:formdata,
-        method: 'POST'
-    };
+    connection.command.push(loginTask, function(error, response, body){
 
-    request(options, function (error, response, body) {
         if (!error && response.statusCode == 200) {
             var data = JSON.parse(body);
 
             var j = request.jar();
             j.setCookie(request.cookie('ApiSession=' + data.ApiSession), config.api.Hive);
-            self.context.authToken = j;
-            self.context.userId = data.userId;
-
+            connection.context.authToken = j;
+            connection.context.username = data.username;
+            var userObject = JSON.parse('{\"users\":{\"' + data.username + '\":{}}}');
             if (data.hubIds && data.hubIds.length > 0) {
-                self.context.id = data.hubIds[0];
-                var hub = new Hub(self.context, data.hubIds[0]);
-                hub.once('complete', function(controllers) {
-                        self.context.controller = this.context.controller;
-                        self.emit('login', controllers);
+                var hub = new Hub(userObject, data.hubIds[0]);
+
+                hub.FindController(function(deviceId){
+
+                    self.emit('login', deviceId);
                 });
-                hub.FindController();
             }
+
         }
         else {
-            console.log(response.statusCode + ' - ' + uri);
+            console.log(response.statusCode);
         }
     });
+
+//    request(options, function (error, response, body) {
+//        if (!error && response.statusCode == 200) {
+//            var data = JSON.parse(body);
+//
+//            var j = request.jar();
+//            j.setCookie(request.cookie('ApiSession=' + data.ApiSession), config.api.Hive);
+//            self.context.authToken = j;
+//            self.context.userId = data.userId;
+//
+//            if (data.hubIds && data.hubIds.length > 0) {
+//                self.context.id = data.hubIds[0];
+//                var hub = new Hub(self.context, data.hubIds[0]);
+//                hub.once('complete', function(controllers) {
+//                        self.context.controller = this.context.controller;
+//                        self.emit('login', controllers);
+//                });
+//                hub.FindController();
+//            }
+//        }
+//        else {
+//            console.log(response.statusCode + ' - ' + uri);
+//        }
+//    });
 }
 
 Hive.prototype.Logout = function() {
-    var uri = config.api.Hive + 'logout';
+
     var self = this;
 
-    var options = {
-        url:uri,
-        headers:{'User-Agent': 'bg-hive-api/0.1.0'},
-        jar:self.context.authToken,
-        method: 'POST'
-    };
+    connection.command.drain = function(){
 
-    request(options, function (error, response, body) {
-        if (!error && response.statusCode == 204) {
-            self.context.authToken = undefined;
-            self.context.controller = null;
-            self.context.id = null;
-            self.context.userId = null;
-            self.emit('logout');
+        var logoutTask = {
+            logout:{
+                POST:{}
+            }
         }
-        else {
-            console.log(response.statusCode + ' - ' + uri);
-        }
-    });
+
+        connection.command.push(logoutTask, function (error, response, body) {
+
+            if (!error && response.statusCode == 204) {
+                self.context.authToken = undefined;
+                connection.context.authToken = undefined;
+                connection.context.username = undefined;
+                self.emit('logout');
+            }
+            else {
+                console.log(response.statusCode);
+            }
+
+            connection.command.kill();
+
+        });
+    };
 };
 
 module.exports = Hive;

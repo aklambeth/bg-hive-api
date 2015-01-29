@@ -3,6 +3,8 @@ var util = require('util');
 var request = require('request');
 var async = require("async");
 
+module.exports.Connections = 0;
+
 module.exports = Widget;
 
 function Widget(context)
@@ -52,6 +54,7 @@ Widget.prototype.Call = function(data, method) {
                 };
 
                 request(options, function (error, response, body) {
+                    module.exports.Connections--;
                     if (!error && response.statusCode == 204) {
                         self.emit('accepted');
                     }
@@ -118,6 +121,7 @@ Widget.prototype.Call = function(data, method) {
 
         }
         catch (ex) {
+            module.exports.Connections = 0;
             self.emit('error', ex);
         }
 }
