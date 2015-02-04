@@ -6,7 +6,7 @@ var request = require('request');
 module.exports = HotWaterControl;
 
 function HotWaterControl(context) {
-    Widget.call(this, context, "HotWaterController");
+    Widget.call(this, context, "hotwater");
 }
 
 util.inherits(HotWaterControl, Widget);

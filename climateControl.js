@@ -1,14 +1,13 @@
 var Widget = require('./Widget');
 var util = require('util');
 var request = require('request');
-var async = require("async");
 
 
 module.exports = ClimateControl;
 
 
 function ClimateControl(context) {
-    this.context = context;
+    Widget.call(this, context, "climate");
 }
 
 util.inherits(ClimateControl, Widget);
@@ -20,7 +19,7 @@ ClimateControl.prototype.SetState = function(req) {
 }
 
 ClimateControl.prototype.GetState = function(){
-    this.SetState(null);
+    this.Call({GET:{}});
 }
 
 ClimateControl.prototype.TargetTemperature = function(target){

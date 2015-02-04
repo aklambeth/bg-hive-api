@@ -40,8 +40,8 @@ Hubs.prototype.FindController = function(callback) {
             var deviceId = JSON.parse(body);
 
             var devices = {'devices':
-                    {'HotWaterController':JSON.parse("{\"" + deviceId.id + "\":{}}"),
-                     'HeatingController':JSON.parse("{\"" + deviceId.id + "\":{}}")}
+                    {'hotwater':JSON.parse("{\"" + deviceId.id + "\":{}}"),
+                     'climate':JSON.parse("{\"" + deviceId.id + "\":{}}")}
                 };
 
             self.hub['users'][connection.context.username]['hubs'][self.context.id] = devices;

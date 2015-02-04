@@ -1,5 +1,6 @@
 var EventEmitter = require('events').EventEmitter;
 var util = require('util');
+var extend = require('util')._extend;
 var connection = require('./Connection.js');
 
 module.exports.Connections = 0;
@@ -10,11 +11,16 @@ function Widget(context, name)
 {
     this.hubId = Object.keys(context['users'][connection.context.username]['hubs'])[0]; // we only support one hub for now.
     this.deviceId = Object.keys(context['users'][connection.context.username]['hubs'][this.hubId]['devices'][name])[0];
+    this.deviceName = name;
 
-    this.context = context;
+    var contextObject = JSON.parse("{\"users\":{\"" + connection.context.username + "\":{}}}")
+
     // now set the active device to hotwater
-    this.context['users'][connection.context.username]['hubs'][this.hubId]['devices'] =
-        JSON.parse("{\"" + name + "\":{\"" + this.deviceId + "\":{}}}");
+    contextObject['users'][connection.context.username] = {'widgets':
+        JSON.parse("{\"" + name + "\":{\"" + this.deviceId + "\":{}}}")
+    };
+
+    this.context = contextObject;
 
     EventEmitter.call(this);
 }
@@ -32,7 +38,7 @@ Widget.prototype.Call = function(resquestObject) {
 
             if (resquestObject) {
                 task = self.context;
-                task['users'][connection.context.username]['hubs'][this.hubId]['devices']['HotWaterController'][this.deviceId] = resquestObject;
+                task['users'][connection.context.username]['widgets'][self.deviceName][self.deviceId] = resquestObject;
             }
             else
             {
@@ -54,26 +60,26 @@ Widget.prototype.Call = function(resquestObject) {
 
                         if (errorReason.error.reason == 'NOT_AUTHORIZED')
                         {
-                            self.emit('not_authorised', control);
+                            self.emit('not_authorised', response);
                         }
 
                         if (errorReason.error.reason == 'NO_SUCH_TOKEN')
                         {
-                            self.emit('no_token', control);
+                            self.emit('no_token', response);
                         }
 
                         if (errorReason.error.reason == 'NO_SUCH_SESSION')
                         {
-                            self.emit('session_timeout', control);
+                            self.emit('session_timeout', response);
                         }
 
-                    } else if (error && err.statusCode == 403) {
+                    } else if (error && error.statusCode == 403) {
                         self.emit('not_available');
                     }
                     else if (error) {
 
-                        console.log(err.statusCode + ' - ' + uri);
-                        self.emit('error', err);
+                        console.log(error.statusCode);
+                        self.emit('error', error);
 
                     }
                 }

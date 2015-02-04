@@ -15,7 +15,6 @@ function HeatingEventHandler(controller)
 
         controller.on('update', function(data){
             console.log(data);
-            hive.Logout();
         });
 
         controller.on('accepted', function(){
@@ -29,7 +28,6 @@ function HeatingEventHandler(controller)
 
         controller.on('complete', function(response){
             console.log(response);
-            hive.Logout();
         });
     }
 }
@@ -65,10 +63,13 @@ function HotWaterEventHandler(controller)
 hive.on('login', function(user){
     console.log(user);
     var water = new HotWaterControl(user);
+    var climate = new ClimateControl(user);
 
     HotWaterEventHandler(water);
-
+    HeatingEventHandler(climate);
+    climate.GetState();
     water.GetState();
+
 });
 
 hive.on('logout', function(){
