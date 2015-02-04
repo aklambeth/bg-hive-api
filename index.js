@@ -81,30 +81,6 @@ Hive.prototype.Login = function() {
             console.log(response.statusCode);
         }
     });
-
-//    request(options, function (error, response, body) {
-//        if (!error && response.statusCode == 200) {
-//            var data = JSON.parse(body);
-//
-//            var j = request.jar();
-//            j.setCookie(request.cookie('ApiSession=' + data.ApiSession), config.api.Hive);
-//            self.context.authToken = j;
-//            self.context.userId = data.userId;
-//
-//            if (data.hubIds && data.hubIds.length > 0) {
-//                self.context.id = data.hubIds[0];
-//                var hub = new Hub(self.context, data.hubIds[0]);
-//                hub.once('complete', function(controllers) {
-//                        self.context.controller = this.context.controller;
-//                        self.emit('login', controllers);
-//                });
-//                hub.FindController();
-//            }
-//        }
-//        else {
-//            console.log(response.statusCode + ' - ' + uri);
-//        }
-//    });
 }
 
 Hive.prototype.Logout = function() {

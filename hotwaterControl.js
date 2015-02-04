@@ -1,13 +1,12 @@
 var Widget = require('./Widget');
 var util = require('util');
 var request = require('request');
-var async = require("async");
 
 
 module.exports = HotWaterControl;
 
 function HotWaterControl(context) {
-    this.context = context;
+    Widget.call(this, context, "HotWaterController");
 }
 
 util.inherits(HotWaterControl, Widget);
@@ -16,11 +15,24 @@ HotWaterControl.prototype.Mode = { "Schedule":"SCHEDULE", "Manual":"MANUAL", "Bo
 HotWaterControl.prototype.State = { "On":"ON", "Off":"OFF"};
 HotWaterControl.prototype.SetState = function(state)
 {
-    var post = {hotwater:state};
+    var task = {
+        'controls':{
+            'PUT':{
+                'operation':state
+            }
+        }
+    };
 
-    this.Call(post, this.METHOD.Put);
+    this.Call(task);
 }
 
 HotWaterControl.prototype.GetState = function(){
-    this.Call({hotwater:null}, this.METHOD.Put);
+
+    var task = {
+        'controls':{
+            'GET':{}
+        }
+    };
+
+    this.Call(task);
 }

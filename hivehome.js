@@ -1,5 +1,7 @@
 var Hive = require('./index.js');
 var util = require('util');
+var ClimateControl = require('./climateControl');
+var HotWaterControl = require('./hotwaterControl');
 
 
 var hive = new Hive("adrian@lambeth.org", "1396734046");
@@ -60,23 +62,13 @@ function HotWaterEventHandler(controller)
     }
 }
 
-
-//hive.on('login', function(controllers){
-//
-//    var heatingController = controllers.HeatingController;;
-//    var hotwaterController = controllers.HotWaterController;
-//
-//    HeatingEventHandler(heatingController);
-//    HotWaterEventHandler(hotwaterController);
-//
-//
-//    hotwaterController.SetState({"controls":{"operation":"SCHEDULE"}});
-//
-//});
-
 hive.on('login', function(user){
     console.log(user);
-    hive.Logout();
+    var water = new HotWaterControl(user);
+
+    HotWaterEventHandler(water);
+
+    water.GetState();
 });
 
 hive.on('logout', function(){
