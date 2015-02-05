@@ -13,6 +13,8 @@ util.inherits(HotWaterControl, Widget);
 
 HotWaterControl.prototype.Mode = { "Schedule":"SCHEDULE", "Manual":"MANUAL", "Boost":"BOOST" };
 HotWaterControl.prototype.State = { "On":"ON", "Off":"OFF"};
+
+
 HotWaterControl.prototype.SetState = function(state)
 {
     var task = {
@@ -31,8 +33,21 @@ HotWaterControl.prototype.GetState = function(){
     var task = {
         'controls':{
             'GET':{}
-        }
-    };
+            }
+        };
+
+    this.Call(task);
+}
+
+HotWaterControl.prototype.GetSchedule = function(){
+
+    var task = {
+        'controls':{
+            'schedule':{
+                'GET':{}
+                }
+            }
+        };
 
     this.Call(task);
 }

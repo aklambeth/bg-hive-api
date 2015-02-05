@@ -52,10 +52,7 @@ Hive.prototype.Login = function() {
         }
     }
 
-    //var hubs = {};
     var self = this;
-
-    //console.log('->login - ' + uri );
 
     connection.command.push(loginTask, function(error, response, body){
 
