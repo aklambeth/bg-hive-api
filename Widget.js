@@ -19,19 +19,6 @@ function Widget(context, name)
 util.inherits(Widget, EventEmitter);
 
 
-Widget.prototype.RequestObject = function(resquestObject) {
-
-    var self = this;
-    var task = {};
-
-    if (resquestObject) {
-        task = self.context;
-        task['users'][connection.context.username]['widgets'][self.deviceName][self.deviceId] = resquestObject;
-    }
-
-    return task;
-};
-
 Widget.prototype.Call = function(resquestObject) {
         var self = this;
 

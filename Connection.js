@@ -7,7 +7,10 @@ module.exports.context = {
     domain:"https://api.bgchlivehome.co.uk/v5",
     headers:{'User-Agent': 'bg-hive-api/0.1.0'},
     username:undefined,
-    authToken:undefined
+    authToken:undefined,
+    hubs:[{
+        id:undefined, devices:undefined
+    }]
 };
 
 function getTaskURI(task){
@@ -40,14 +43,19 @@ module.exports.command = async.queue(function (task, callback) {
         headers:module.exports.context.headers,
         jar:module.exports.context.authToken,
         form: undefined,
-        method: undefined
+        method: undefined,
+        qs:undefined
     };
 
     if (typeof task == 'object') {
         var result =  getTaskURI(task);
         options.url = module.exports.context.domain + result.url;
         options.method = result.method;
-        options.form = result.body;
+
+        if (result.method != 'GET')
+            options.form = result.body;
+        else
+            options.qs = result.body;
     }
 
     request(options, function (error, response, body) {

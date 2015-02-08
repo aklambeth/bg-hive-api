@@ -2,11 +2,11 @@ var Hive = require('./index.js');
 var util = require('util');
 var ClimateControl = require('./climateControl');
 var HotWaterControl = require('./hotwaterControl');
+var Temperature = require('./temperature');
 var hive = new Hive("adrian@lambeth.org", "1396734046");
 
 
-function HeatingEventHandler(controller)
-{
+function HeatingEventHandler(controller) {
     if (controller != undefined)
     {
         var Modes = controller.Mode;
@@ -30,8 +30,7 @@ function HeatingEventHandler(controller)
 }
 
 
-function HotWaterEventHandler(controller)
-{
+function HotWaterEventHandler(controller) {
     if (controller != undefined)
     {
         var Modes = controller.Mode;
@@ -54,19 +53,47 @@ function HotWaterEventHandler(controller)
     }
 }
 
+function TemperatureEventHandler(controller) {
+
+    if (controller != undefined)
+    {
+        controller.on('update', function(data){
+            console.log(data);
+        });
+
+        controller.on('accepted', function(){
+            controller.GetState();
+        });
+
+        controller.on('error', function(response){
+            console.log(response);
+        });
+
+        controller.on('complete', function(response){
+            console.log(response);
+        });
+    }
+
+}
+
 hive.on('login', function(context){
     console.log(context);
     var water = new HotWaterControl(context);
     var climate = new ClimateControl(context);
+    var temp = new Temperature(context);
 
     HotWaterEventHandler(water);
     HeatingEventHandler(climate);
+    TemperatureEventHandler(temp);
 
-    climate.GetSchedule();
+    //temp.GetState(temp.Period.Day);
+
+    //climate.GetSchedule();
     water.GetState();
 
-    hive.Logout();
-
+    setTimeout(function() {
+        hive.Logout();
+    }, 3000);
 });
 
 hive.on('logout', function(){
@@ -74,4 +101,3 @@ hive.on('logout', function(){
 });
 
 hive.Login();
-

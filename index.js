@@ -11,7 +11,7 @@ var config = {
     },
 
     api : {
-        "Hive": "https://api.bgchlivehome.co.uk/v5/",
+        "Hive": "https://api.bgchlivehome.co.uk/v5",
         "AlertMe" : "https://api.alertme.com/v5"
     }
 }
@@ -24,21 +24,39 @@ function Hive(username, password, api) {
     if (!api)
         api = 'Hive';
 
-    var uri;
     if (api == "AlertMe")
-        uri = config.api.AlertMe;
+        connection.context.domain = config.api.AlertMe;
     else
-        uri = config.api.Hive;
-
-    var context = {
-        user:undefined,
-        hub:undefined
-    }
-
-    this.context = context;
+        connection.context.domain = config.api.Hive;
 
 }
 util.inherits(Hive, EventEmitter);
+
+logout = function(self){
+
+    var logoutTask = {
+        logout:{
+            POST:{}
+        }
+    }
+
+    connection.command.push(logoutTask, function (error, response, body) {
+
+        if (!error && response.statusCode == 204) {
+            connection.context.authToken = undefined;
+            connection.context.username = undefined;
+            self.emit('logout');
+        }
+        else {
+            console.log(response.statusCode);
+        }
+
+        // stop the queue from processing and clear down all tasks
+        connection.command.pause();
+        connection.command.kill();
+
+    });
+}
 
 Hive.prototype.Login = function() {
 
@@ -54,60 +72,63 @@ Hive.prototype.Login = function() {
 
     var self = this;
 
-    connection.command.push(loginTask, function(error, response, body){
+    // if we're already connected then re-use the existing connection
+    if (connection.context.authToken && connection.context.username) {
+        var hub = new Hub(JSON.parse('{\"users\":{\"' + connection.context.username + '\":{}}}'));
+        hub.FindController(function(deviceId){
+            // remove the drain callback which may log us out again
+            connection.command.drain = undefined;
+            self.emit('login', deviceId);
+        });
 
-        if (!error && response.statusCode == 200) {
-            var data = JSON.parse(body);
+    } else {
+        // re-authenticate our credentials with the server
+        connection.command.unshift(loginTask, function(error, response, body){
 
-            var j = request.jar();
-            j.setCookie(request.cookie('ApiSession=' + data.ApiSession), config.api.Hive);
-            connection.context.authToken = j;
-            connection.context.username = data.username;
-            var userObject = JSON.parse('{\"users\":{\"' + data.username + '\":{}}}');
-            if (data.hubIds && data.hubIds.length > 0) {
-                var hub = new Hub(userObject, data.hubIds[0]);
+            if (!error && response.statusCode == 200) {
+                var data = JSON.parse(body);
 
-                hub.FindController(function(deviceId){
+                var j = request.jar();
+                j.setCookie(request.cookie('ApiSession=' + data.ApiSession), config.api.Hive);
+                connection.context.authToken = j;
+                connection.context.username = data.username;
+                var userObject = JSON.parse('{\"users\":{\"' + data.username + '\":{}}}');
 
-                    self.emit('login', deviceId);
-                });
+                if (data.hubIds && data.hubIds.length > 0) {
+                    connection.context.hubs[0].id = data.hubIds[0];
+                    var hub = new Hub(userObject);
+                    hub.FindController(function(deviceId){
+                        // remove the drain callback which may log us out again
+                        connection.command.drain = undefined;
+                        self.emit('login', deviceId);
+                    });
+                }
+
             }
+            else {
+                console.log(response.statusCode);
+            }
+        });
+    }
 
-        }
-        else {
-            console.log(response.statusCode);
-        }
-    });
+    // resume processing the queue
+    if (connection.command.paused)
+        connection.command.resume();
 }
+
+
 
 Hive.prototype.Logout = function() {
 
     var self = this;
 
-    connection.command.drain = function(){
-
-        var logoutTask = {
-            logout:{
-                POST:{}
-            }
-        }
-
-        connection.command.push(logoutTask, function (error, response, body) {
-
-            if (!error && response.statusCode == 204) {
-                self.context.authToken = undefined;
-                connection.context.authToken = undefined;
-                connection.context.username = undefined;
-                self.emit('logout');
-            }
-            else {
-                console.log(response.statusCode);
-            }
-
-            connection.command.kill();
-
-        });
-    };
+    if (!connection.command.idle()) {
+        connection.command.drain = function(){
+            logout(self);
+        };
+    } else {
+        logout(self);
+    }
 };
 
 module.exports = Hive;
