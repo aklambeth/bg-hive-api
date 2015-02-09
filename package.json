@@ -1,14 +1,14 @@
 {
   "name": "bg-hive-api",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "bg hive home api",
   "main": "./index.js",
     "author": {
-        "name": "Adrian",
+        "name": "aklambeth",
         "email": ""
     },
   "dependencies": {
-    "request" : "2.x.x",
-    "async" : "0.9.x"
+    "request" : "2.51.0",
+    "async" : "0.9.0"
   }
 }
