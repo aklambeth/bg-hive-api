@@ -46,33 +46,23 @@ Widget.prototype.Call = function(resquestObject) {
                     self.emit('accepted');
                 }
                 else {
-                    if (error && response.statusCode == 401) {
-
-                        var errorReason = JSON.parse(response.body);
-
-                        if (errorReason.error.reason == 'NOT_AUTHORIZED')
-                        {
+                    var errorReason = JSON.parse(response.body);
+                    if (response.statusCode == 401) {
+                        if (errorReason.error.reason == 'NOT_AUTHORIZED') {
                             self.emit('not_authorised', errorReason);
-                        }
-
-                        if (errorReason.error.reason == 'NO_SUCH_TOKEN')
-                        {
+                        } else if (errorReason.error.reason == 'NO_SUCH_TOKEN') {
                             self.emit('no_token', errorReason);
-                        }
-
-                        if (errorReason.error.reason == 'NO_SUCH_SESSION')
-                        {
+                        } else if (errorReason.error.reason == 'NO_SUCH_SESSION') {
                             self.emit('session_timeout', errorReason);
                         }
-
-                    } else if (error && error.statusCode == 403) {
-                        self.emit('not_available');
-                    }
-                    else if (error) {
-
-                        console.log(error.statusCode);
+                    } else if (response.statusCode == 403) {
+                        self.emit('not_available', errorReason);
+                    } else if (response.statusCode == 404) {
+                        self.emit('invalid', errorReason);
+                    } else if (response.statusCode == 503) {
+                        self.emit('service_unavailable', errorReason);
+                    } else if (error) {
                         self.emit('error', error);
-
                     }
                 }
             });

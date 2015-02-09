@@ -3,7 +3,7 @@ var util = require('util');
 var ClimateControl = require('./climateControl');
 var HotWaterControl = require('./hotwaterControl');
 var Temperature = require('./temperature');
-var hive = new Hive("adrian@lambeth.org", "1396734046");
+var hive = new Hive("adrian@lambeth.org", "h1v3user");
 
 
 function HeatingEventHandler(controller) {
@@ -98,6 +98,14 @@ hive.on('login', function(context){
 
 hive.on('logout', function(){
    console.log('closed');
+});
+
+hive.on('not_authorised', function(response){
+    console.log(response.error.reason);
+});
+
+hive.on('locked', function(response){
+    console.log('Your account is locked. You have had 5 successive login failures.');
 });
 
 hive.Login();

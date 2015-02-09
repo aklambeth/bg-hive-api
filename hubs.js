@@ -58,7 +58,8 @@ Hubs.prototype.FindController = function(callback) {
                 callback(self.hub);
             }
             else {
-                console.log(response.statusCode + ' ' + response.uri);
+                var errorReason = JSON.parse(response.body);
+                self.emit('invalid', errorReason);
             }
         });
     }

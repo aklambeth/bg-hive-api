@@ -104,9 +104,19 @@ Hive.prototype.Login = function() {
                     });
                 }
 
-            }
-            else {
-                console.log(response.statusCode);
+            } else {
+                var errorReason = JSON.parse(response.body);
+                if (response.statusCode == 400) {
+                    if (errorReason.error.reason == 'WRONG_PASSWORD') {
+                        self.emit('not_authorised', errorReason);
+                    } else if (errorReason.error.reason == 'ACCOUNT_LOCKED') {
+                        self.emit('locked', errorReason);
+                    } else if (errorReason.error.reason == 'TOKENS_ARE_NOT_COMPATIBLE_WITH_LOGIN') {
+                        self.emit('invalid', errorReason);
+                    }
+                } else if (response.statusCode == 500 || response.statusCode == 503) {
+                    self.emit('unavailable', errorReason);
+                }
             }
         });
     }
