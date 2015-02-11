@@ -107,7 +107,7 @@ Hive.prototype.Login = function() {
             } else {
                 var errorReason = JSON.parse(response.body);
                 if (response.statusCode == 400) {
-                    if (errorReason.error.reason == 'WRONG_PASSWORD') {
+                    if (errorReason.error.reason == 'USERNAME_PASSWORD_ERROR') {
                         self.emit('not_authorised', errorReason);
                     } else if (errorReason.error.reason == 'ACCOUNT_LOCKED') {
                         self.emit('locked', errorReason);
