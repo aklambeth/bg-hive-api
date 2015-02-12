@@ -1,9 +1,14 @@
-#British Gas Hive Active Heating. Node.js API.
+#Hive Active Heating. API.
+
+This node.js module provides a wrapper around the REST API provided by British Gas to control your [Hive home heating system](http://www.hivehome.com).
+
+###Note
+This software is in **not endorsed by British Gas** and is therefore subject to change at any time. **Use at your own risk**.
 
 ##Installation
 
 ```
-sudo npm install bg-hive-api
+npm install bg-hive-api
 ```
 ##Examples
 ###Connecting
