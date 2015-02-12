@@ -1,12 +1,29 @@
 {
   "name": "bg-hive-api",
   "version": "1.0.0",
-  "description": "bg hive home api",
+  "description": "Hive Active Heating. API",
+  "keywords": [
+    "hive",
+    "home",
+    "heating",
+    "alertme",
+    "api",
+    "thermostat"
+  ],
+  "bugs": {
+    "mail": "github@lambeth.org",
+    "url": "https://github.com/aklambeth/bg-hive-api/issues"
+  },
   "main": "./index.js",
     "author": {
         "name": "aklambeth",
         "email": ""
     },
+  "license": "MIT",
+  "repository" :
+  { "type" : "git",
+    "url" : "https://github.com/aklambeth/bg-hive-api"
+  },
   "dependencies": {
     "request" : "2.51.0",
     "async" : "0.9.0"
