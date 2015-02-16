@@ -17,7 +17,7 @@ npm install bg-hive-api
 
 * [Examples](#Examples)
   *  [`Connecting`](#Connecting)
-* [Event Handling](#Examples)
+* [Event Handling](#Events)
 * [Reference](#Reference)
   * [`Hive`](#Ref-Hive)
   * [`ClimateControl`](#Ref-Heating)
@@ -484,7 +484,7 @@ Temperature history.
 var Temperature = require('bg-hive-api/temperature');
 ...
 hive.on('login', function(context){
-    var temerature = new Temperature(context);
+    var temperature = new Temperature(context);
 });
 
 ```
