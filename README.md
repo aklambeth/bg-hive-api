@@ -235,14 +235,14 @@ Connection Closed
 
 ### Error events
 
-** Authentication Errors **
+**Authentication Errors**
 
 * not_authorised - Incorrect user name or password. Returns :- `error`
 * locked - Account was locked after 5 failed log in attempts. Returns :- `error`
 * invalid - Invalid login attempt. Returns :- `error`
 * session_timout - The current session has expired. Typically after 20 minutes.
 
-** General Errors **
+**General Errors**
 
 * not_available - The requested action is not available or not supported.
 * invalid - The requested action was invalid, typically thrown after passing a bad parameter value.
@@ -323,7 +323,7 @@ var Hive = require('bg-hive-api');
 var hive = new Hive(username, password, api);
 ```
 
-** Parameters **
+**Parameters**
 
 *username* -
 This will be the same name you use to login into the hive website.
@@ -339,11 +339,11 @@ Corresponding password you use to authenticate.
 
 Opens an http connection and authenticates with the remote server.
 
-** Parameters **
+**Parameters**
 
 *none*
 
-** Events **
+**Events**
 
 * login - On Success. Returns :- Connection `context` object.
 
@@ -351,11 +351,11 @@ Opens an http connection and authenticates with the remote server.
 
 Clears all pending tasks from the command queue, and closes the http connection.
 
-** Parameters **
+**Parameters**
 
 *none*
 
-** Events **
+**Events**
 
 * logout - On Success.
 
@@ -377,11 +377,11 @@ hive.on('login', function(context){
 
 Return the current state of the heating system.
 
-** Parameters **
+**Parameters**
 
 *none*
 
-** Events **
+**Events**
 
 * complete - On Complete. Returns :- `response` object.
 
@@ -389,14 +389,14 @@ Return the current state of the heating system.
 
 Set the current state of the heating system.
 
-** Parameters **
+**Parameters**
 
 * `ClimateControl.Mode.Off` - Frost protection.
 * `ClimateControl.Mode.Manual` - Maintain the current target temperature.
 * `ClimateControl.Mode.Schedule` - On scheduled timer.
 * `ClimateControl.Mode.Override` - Maintain target temperature until next scheduled event.
 
-** Events **
+**Events**
 
 * accepted - New state has been set.
 
@@ -404,11 +404,11 @@ Set the current state of the heating system.
 
 Set the desired target temperature.
 
-** Parameters **
+**Parameters**
 
 * `temperature` - Numeric temperature value in C
 
-** Events **
+**Events**
 
 * accepted - New temperature has been set.
 
@@ -416,11 +416,11 @@ Set the desired target temperature.
 
 Request the programmed schedule.
 
-** Parameters **
+**Parameters**
 
 *none*
 
-** Events **
+**Events**
 
 * complete - On Complete. Returns :- `response` object.
 
@@ -441,11 +441,11 @@ Hive.on('login', function(context){
 
 Return the current state of the hot water system.
 
-** Parameters **
+**Parameters**
 
 *none*
 
-** Events **
+**Events**
 
 * complete - On Complete. Returns :- `response` object.
 
@@ -453,12 +453,12 @@ Return the current state of the hot water system.
 
 Set the current state of the heating system.
 
-** Parameters **
+**Parameters**
 
 * `HotWaterControl.Mode.Schedule` - On pre-programmed scheduled timer.
 * `HotWaterControl.Mode.Boost` - Turn on hot water for one hour.
 
-** Events **
+**Events**
 
 * accepted - New state has been set.
 
@@ -467,11 +467,11 @@ Set the current state of the heating system.
 
 Request the programmed schedule.
 
-** Parameters **
+**Parameters**
 
 *none*
 
-** Events **
+**Events**
 
 * complete - On Complete. Returns :- `response` object.
 
@@ -495,6 +495,6 @@ hive.on('login', function(context){
 
 Get the temperature history recorded by the thermostat over a defined period.
 
-** Parameters **
+**Parameters**
 
 `Temperature.Period.Hour`, `Temperature.Period.Day`, `Temperature.Period.Week`, `Temperature.Period.Month`, `Temperature.Period.Year`
