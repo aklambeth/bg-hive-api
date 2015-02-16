@@ -12,7 +12,7 @@ function ClimateControl(context) {
 
 util.inherits(ClimateControl, Widget);
 
-ClimateControl.prototype.Mode = { "Off":"OFF", "Manual":"MANUAL", "Schedule":"SCHEDULE" };
+ClimateControl.prototype.Mode = { "Off":"OFF", "Manual":"MANUAL", "Schedule":"SCHEDULE", "Override":"OVERRIDE" };
 
 ClimateControl.prototype.SetState = function(req) {
 

@@ -1,8 +1,10 @@
 #Hive Active Heating. API.
 
+[![npm package](https://nodei.co/npm/bg-hive-api.png?downloads=true&downloadRank=false&stars=true)](https://nodei.co/npm/bg-hive-api/)
+
 This node.js module provides a wrapper around the REST API provided by British Gas to control your [Hive home heating system](http://www.hivehome.com).
 
-###Note
+### Note
 This software is in **not endorsed by British Gas** and is therefore subject to change at any time. **Use at your own risk**.
 
 ##Installation
@@ -10,8 +12,23 @@ This software is in **not endorsed by British Gas** and is therefore subject to 
 ```
 npm install bg-hive-api
 ```
-##Examples
-###Connecting
+
+## Contents
+
+* [Examples](#Examples)
+  *  [`Connecting`](#Connecting)
+* [Event Handling](#Examples)
+* [Reference](#Reference)
+  * [`Hive`](#Ref-Hive)
+  * [`ClimateControl`](#Ref-Heating)
+  * [`HotWaterControl`](#Ref-HotWater)
+  * [`Temperature`](#Ref-Temp)
+
+<a name="Examples" />
+## Examples
+
+<a name="Connecting" />
+### Connecting
 Before we can anything we first have to authenticate with the remote server and create an active session.
 
 First authenticate by instantiating the 'Hive' object with your login credentials, the same user name and password you use to login to the Hive website and App, then call the Login() method.
@@ -30,7 +47,7 @@ var hive = new Hive("<<your login>>", "<<your password>>");
 hive.on('login', function(context){
     console.log('Connected');
     hive.Logout();
-}
+});
 
 // on logout call this event handler
 hive.on('logout', function(){
@@ -41,7 +58,7 @@ hive.on('logout', function(){
 hive.Login();
 
 ```
-###ClimateController
+### ClimateController
 
 ```javascript
 var ClimateControl = require('bg-hive-api/climateControl');
@@ -126,7 +143,7 @@ If successful you will see the response output in the console window.
   ...
 Connection Closed
 ```
-###HotWaterController
+### HotWaterController
 
 ```javascript
 var HotWaterControl = require('bg-hive-api/hotwaterControl');
@@ -167,7 +184,7 @@ If successful you will see the response in the console.
   available: [ 'SCHEDULE', 'MANUAL', 'BOOST', 'OFF' ] }
 Connection Closed
 ```
-###Temperature History
+### Temperature History
 
 ```javascript
 var Temperature = require('bg-hive-api/temperature');
@@ -207,3 +224,277 @@ A successful request will display the temperature data in the console.
   temperatureUnit: 'C' }
 Connection Closed
 ```
+
+<a name="Events" />
+## Events
+
+### Success events
+
+* complete - Returns response object with the product of the request.
+* accepted - Called once a `set` request has changed system state successfully.
+
+### Error events
+
+** Authentication Errors **
+
+* not_authorised - Incorrect user name or password. Returns :- `error`
+* locked - Account was locked after 5 failed log in attempts. Returns :- `error`
+* invalid - Invalid login attempt. Returns :- `error`
+* session_timout - The current session has expired. Typically after 20 minutes.
+
+** General Errors **
+
+* not_available - The requested action is not available or not supported.
+* invalid - The requested action was invalid, typically thrown after passing a bad parameter value.
+* service_unavailable - Remote service is not available, possibly caused by too many consecutive requests.
+* error - Unknown error condition. Return the error object.
+
+### Event Handling
+
+It's generally easier and clearer to create separate handler functions to handle events for each controller object as in the following pattern.
+
+```javascript
+...
+function HeatingEventHandler(controller) {
+    if (controller != undefined)
+    {
+        controller.on('update', function(data){
+            console.log(data);
+        });
+
+        controller.on('accepted', function(){
+            console.log('OK');
+        });
+
+        controller.on('error', function(response){
+            console.log(response);
+        });
+
+        controller.on('complete', function(response){
+            console.log(response);
+        });
+    }
+}
+
+function HotWaterEventHandler(controller) {
+    if (controller != undefined)
+    {
+        controller.on('update', function(data){
+             console.log(data);
+        });
+
+        controller.on('accepted', function(){
+            console.log('OK')
+        });
+
+        controller.on('error', function(response){
+            console.log(response);
+        });
+
+        controller.on('complete', function(response){
+            console.log(response);
+        });
+    }
+}
+
+...
+hive.on('login', function(context){
+    var climate = new HotWaterControl(context);
+    var hotwater = new HotWaterControl(context);
+
+    HotWaterEventHandler(hotwater);
+    HeatingEventHandler(climate);
+
+    hive.Logout();
+});
+
+...
+
+```
+
+<a name="Reference" />
+## Reference
+
+<a name="Ref-Hive" />
+### Hive(username, password, api)
+
+```javascript
+var Hive = require('bg-hive-api');
+var hive = new Hive(username, password, api);
+```
+
+** Parameters **
+
+*username* -
+This will be the same name you use to login into the hive website.
+
+*password* -
+Corresponding password you use to authenticate.
+
+*api [optional]* - String value can be either 'Hive' or 'AlertMe'. Defaults to 'HIve'. This parameter specifies the url of the backend rest api.
+
+### Methods
+
+#### Login()
+
+Opens an http connection and authenticates with the remote server.
+
+** Parameters **
+
+*none*
+
+** Events **
+
+* login - On Success. Returns :- Connection `context` object.
+
+#### Logout()
+
+Clears all pending tasks from the command queue, and closes the http connection.
+
+** Parameters **
+
+*none*
+
+** Events **
+
+* logout - On Success.
+
+<a name="Ref-Heating" />
+### ClimateControl(`context`)
+
+```javascript
+var ClimateControl = require('bg-hive-api/climateControl');
+...
+hive.on('login', function(context){
+    var climate = new ClimateControl(context);
+});
+
+```
+
+### Methods
+
+#### GetState()
+
+Return the current state of the heating system.
+
+** Parameters **
+
+*none*
+
+** Events **
+
+* complete - On Complete. Returns :- `response` object.
+
+#### SetState(`Mode`)
+
+Set the current state of the heating system.
+
+** Parameters **
+
+* `ClimateControl.Mode.Off` - Frost protection.
+* `ClimateControl.Mode.Manual` - Maintain the current target temperature.
+* `ClimateControl.Mode.Schedule` - On scheduled timer.
+* `ClimateControl.Mode.Override` - Maintain target temperature until next scheduled event.
+
+** Events **
+
+* accepted - New state has been set.
+
+#### TargetTemperature(`temperature`)
+
+Set the desired target temperature.
+
+** Parameters **
+
+* `temperature` - Numeric temperature value in C
+
+** Events **
+
+* accepted - New temperature has been set.
+
+#### GetSchedule()
+
+Request the programmed schedule.
+
+** Parameters **
+
+*none*
+
+** Events **
+
+* complete - On Complete. Returns :- `response` object.
+
+<a name="Ref-HotWater" />
+### HotWaterControl(`context`)
+
+```javascript
+var HotWaterControl = require('bg-hive-api/hotWaterControl');
+...
+Hive.on('login', function(context){
+    var hotwater = new HotWaterControl(context);
+});
+```
+
+### Methods
+
+#### GetState()
+
+Return the current state of the hot water system.
+
+** Parameters **
+
+*none*
+
+** Events **
+
+* complete - On Complete. Returns :- `response` object.
+
+#### SetState(`Mode`)
+
+Set the current state of the heating system.
+
+** Parameters **
+
+* `HotWaterControl.Mode.Schedule` - On pre-programmed scheduled timer.
+* `HotWaterControl.Mode.Boost` - Turn on hot water for one hour.
+
+** Events **
+
+* accepted - New state has been set.
+
+
+#### GetSchedule()
+
+Request the programmed schedule.
+
+** Parameters **
+
+*none*
+
+** Events **
+
+* complete - On Complete. Returns :- `response` object.
+
+<a name="Ref-Temp" />
+### Temperature(`context`)
+
+Temperature history.
+
+```javascript
+var Temperature = require('bg-hive-api/temperature');
+...
+hive.on('login', function(context){
+    var temerature = new Temperature(context);
+});
+
+```
+
+### Methods
+
+#### GetState(`period`)
+
+Get the temperature history recorded by the thermostat over a defined period.
+
+** Parameters **
+
+`Temperature.Period.Hour`, `Temperature.Period.Day`, `Temperature.Period.Week`, `Temperature.Period.Month`, `Temperature.Period.Year`
