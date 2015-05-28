@@ -34,7 +34,9 @@ Hubs.prototype.FindController = function(callback) {
     var deviceRequest = {
         devices:{
             HAHVACThermostatSLR2:{
-                GET:''
+                only:{
+                    GET:''
+                }
             }
         }
     };
@@ -50,7 +52,7 @@ Hubs.prototype.FindController = function(callback) {
 
             if (!error && response.statusCode == 200) {
                 var deviceId = JSON.parse(body);
-                connection.context.hubs[0].devices = GetDevices(deviceId[0].id);
+                connection.context.hubs[0].devices = GetDevices(deviceId.id);
                 self.hub['users'][connection.context.username]['hubs'][connection.context.hubs[0].id] = connection.context.hubs[0].devices;
 
                 callback(self.hub);
