@@ -28,17 +28,15 @@ function GetDevices(deviceId){
 }
 
 Hubs.prototype.FindController = function(callback) {
-
+    
     var self = this;
 
     var deviceRequest = {
         devices:{
-            HAHVACThermostatSLR2:{
-                GET:''
-            }
+            GET:''
         }
     };
-
+    
     var getDeviceTask = self.hub;
     getDeviceTask['users'][connection.context.username]['hubs'][connection.context.hubs[0].id] = deviceRequest;
 
@@ -49,10 +47,15 @@ Hubs.prototype.FindController = function(callback) {
         connection.command.push(getDeviceTask, function(error, response, body){
 
             if (!error && response.statusCode == 200) {
-                var deviceId = JSON.parse(body);
-                connection.context.hubs[0].devices = GetDevices(deviceId[0].id);
-                self.hub['users'][connection.context.username]['hubs'][connection.context.hubs[0].id] = connection.context.hubs[0].devices;
-
+                var installedDevices = JSON.parse(body);
+                
+                installedDevices.forEach(function (dev) {
+                    if (dev.type.substring(0, 16) == 'HAHVACThermostat') {
+                        connection.context.hubs[0].devices = GetDevices(dev.id);
+                        self.hub['users'][connection.context.username]['hubs'][connection.context.hubs[0].id] = connection.context.hubs[0].devices;        
+                    }
+                });
+                
                 callback(self.hub);
             }
             else {

@@ -2,3 +2,4 @@ node_modules/
 bg-hive-api.iml
 bg-hive-api.ipr
 bg-hive-api.iws
+.vscode/

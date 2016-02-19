@@ -5,7 +5,7 @@ var async = require("async");
 
 module.exports.context = {
     domain:"https://api.bgchlivehome.co.uk/v5",
-    headers:{'User-Agent': 'bg-hive-api/0.1.0'},
+    headers:{'User-Agent': 'bg-hive-api/1.0.4'},
     username:undefined,
     authToken:undefined,
     hubs:[{
