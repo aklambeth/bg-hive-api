@@ -60,7 +60,7 @@ Widget.prototype.Call = function(resquestObject) {
                     } else if (response.statusCode == 404) {
                         self.emit('invalid', errorReason);
                     } else if (response.statusCode == 503) {
-                        self.emit('service_unavailable', errorReason);
+                        self.emit('rate_limit', errorReason);
                     } else if (error) {
                         self.emit('error', error);
                     }

@@ -114,8 +114,10 @@ Hive.prototype.Login = function() {
                     } else if (errorReason.error.reason == 'TOKENS_ARE_NOT_COMPATIBLE_WITH_LOGIN') {
                         self.emit('invalid', errorReason);
                     }
-                } else if (response.statusCode == 500 || response.statusCode == 503) {
+                } else if (response.statusCode == 500) {
                     self.emit('unavailable', errorReason);
+                } else if (response.statusCode == 503) {
+                    self.emit('rate_limit', errorReason);
                 }
             }
         });
