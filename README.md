@@ -4,8 +4,16 @@
 
 This node.js module provides a wrapper around the REST API provided by British Gas to control your [Hive home heating system](http://www.hivehome.com).
 
-### Note
-This software is in **not endorsed by British Gas** and is therefore subject to change at any time. **Use at your own risk**.
+## Note
+This software is in **not endorsed by British Gas.** The underlying api is therefore subject to change at any time, which means this code library may suddenly stop working. **Use at your own risk**.
+
+### Release Notes
+
+** 1.0.4 **
+* Fixed - Issue with inconsistent heating thermostat type was preventing discovery in some systems, 'which meant it wouldn't work!'
+* New - Rate limiting event added on connection. 
+* New - Added boost function for heating.
+* Tidy up this here documentation!
 
 ##Installation
 
@@ -13,29 +21,10 @@ This software is in **not endorsed by British Gas** and is therefore subject to 
 npm install bg-hive-api
 ```
 
-## Contents
+## Connecting
 
-* [Examples](#Examples)
-  *  [`Connecting`](#Connecting)
-* [Event Handling](#Events)
-* [Reference](#Reference)
-  * [`Hive`](#Ref-Hive)
-  * [`ClimateControl`](#Ref-Heating)
-  * [`HotWaterControl`](#Ref-HotWater)
-  * [`Temperature`](#Ref-Temp)
-
-<a name="Examples" />
-## Examples
-
-<a name="Connecting" />
-### Connecting
 Before we can anything we first have to authenticate with the remote server and create an active session.
-
 First authenticate by instantiating the 'Hive' object with your login credentials, the same user name and password you use to login to the Hive website and App, then call the Login() method.
-
-If you are logged in successfully the login event handler is called with the session context object. You are now able to control your heating system.
-
-When you're finished call the Logout() method to close the session. The logout event handler will be called whenever the session is closed.
 
 The following program demonstrates these steps by establishing an connection and then immediately logging out again if a successful connection was established. If you don't see *connected* displayed in the console then a connection could not be established, either because your login credentials were wrong or a connection to the remote server could not be established.
 
@@ -54,17 +43,55 @@ hive.on('logout', function(){
    console.log('Connection Closed');
 });
 
+// on invalid username or password
+hive.on('not_authorised', function(){
+   console.log('Connection Refused');
+});
+
 //Log in
 hive.Login();
 
 ```
-### ClimateController
+
+### `Login()`
+
+If you are logged in successfully the login event handler is called with the session context object. You are now able to control your heating system.
+
+```javascript
+// on successful login this event handler is called
+hive.on('login', function(context){
+    console.log('Connected');
+    hive.Logout();
+});
+
+hive.Login();
+```
+
+** Events **
+* login - On Success. Returns :- Connection `context` object.
+
+
+* not_authorised - Incorrect user name or password. Returns :- `error`
+* locked - Account was locked after 5 failed log in attempts. Returns :- `error`
+* invalid - Invalid login attempt. Returns :- `error`
+* rate_limit - Requests to the API are rate limited. Returns :- `error`
+* session_timout - The current session has expired. Typically after 20 minutes.
+
+### `Logout()`
+
+When you're finished call the Logout() method to close the session. The logout event handler will be called whenever the session is closed.
+
+## ClimateController
+
+Use the ClimateControl object to set and read the current state of your heating.
 
 ```javascript
 var ClimateControl = require('bg-hive-api/climateControl');
 ```
 
-Use the ClimateControl object to set and read the current state of your heating. The following program will return the current state of the heating system.
+### `GetState()`
+
+The following program will return the current state of the heating system.
 
 ```javascript
 var Hive = require('bg-hive-api');
@@ -84,7 +111,7 @@ hive.on('login', function(context){
         // log out
         hive.Logout();
     });
-
+ 
     climate.GetState();
 });
 
@@ -93,37 +120,85 @@ hive.on('logout', function(){
    console.log('Connection Closed');
 });
 
+// on invalid username or password
+hive.on('not_authorised', function(){
+   console.log('Connection Refused');
+});
+
 //Log in
 hive.Login();
 
 ```
 
-The following *login* event handler will set the temperature to a constant 19 degrees C before closing the session on successful response.
+** Events **
+* completed - The request was completed sucessfully
+
+
+* not_authorised - Incorrect user name or password
+* session_timout - The current session has expired
+* rate_limit - Requests to the API are rate limited
+* not_available - Remote server is not responding
+* error - Something broke! Check the error response object
+
+### `SetState( mode )`
+
+The SetState method can be used to set the current heating mode.
 
 ```javascript
+...
+    var climate = new ClimateControl(context);
+    climate.SetState(climate.Mode.Boost);
+    
+    // Handle the on accepted event.
+    climate.on('accepted', function(response){
+        ...
+    });
+...
+
+```
+
+** Events **
+* accepted - The update has been accepted
+
+
+* not_authorised - Incorrect user name or password
+* session_timout - The current session has expired
+* rate_limit - Requests to the API are rate limited
+* not_available - Remote server is not responding
+* error - Something broke! Check the error response object
+
+** Parameters **
+
+* `Mode.Off` - Frost protection.
+* `Mode.Manual` - Maintain the current target temperature.
+* `Mode.Schedule` - On scheduled timer.
+* `Mode.Boost`
+
+### `TargetTemperature( temperature )`
+
+The following *login* event handler will set the temperature to a constant 19 degrees C before closing the session on successful response.
+Note the accepted event handler is set to once to prevent it being called again after we change the target temperature.
+
+```javascript
+
+...
 // on successful login this event handler is called
 hive.on('login', function(context){
 
     // Create an instance of the climate controller
     var climate = new ClimateControl(context);
 
-    // Handle the on complete event.
-    climate.on('complete', function(response){
-        // write the response state object to the console.
-        console.log(response);
-        // log out
-        hive.Logout();
-    });
-
-    // Set the heating state to Manual
-    climate.SetState(climate.Mode.Manual);
-
     climate.once('accepted', function(response){
         climate.GetState();;
     });
 
+    // Set the heating state to Manual
+    climate.SetState(climate.Mode.Manual);
+    
     // Set the temperature to 19 C
     climate.TargetTemperature(19);
+    
+    hive.Logout();
 });
 ```
 If successful you will see the response output in the console window.
@@ -143,16 +218,40 @@ If successful you will see the response output in the console window.
   ...
 Connection Closed
 ```
-### HotWaterController
+## HotWaterController
 
-```javascript
-var HotWaterControl = require('bg-hive-api/hotwaterControl');
-```
 The HotWaterControl object is used to set and request the current state of the hot water if your system supports it.
 
-The following event handler sets the state of the hot water to *Scheduled*.
+```javascript
+var HotWaterControl = require('bg-hive-api/hotWaterControl');
+...
+Hive.on('login', function(context){
+    var hotwater = new HotWaterControl(context);
+});
+```
+
+
+### `GetState()`
+
+Return the current state of the hot water system.
+
+** Events **
+* completed - The request was completed sucessfully
+
+
+* not_authorised - Incorrect user name or password
+* session_timout - The current session has expired
+* rate_limit - Requests to the API are rate limited
+* not_available - Remote server is not responding
+* error - Something broke! Check the error response object
+
+
+### `SetState( mode )`
+
+The following event handler sets the state of the hot water to *Scheduled* and returns the current active state.
 
 ```javascript
+...
 // on successful login this event handler is called
 hive.on('login', function(context){
 
@@ -168,11 +267,12 @@ hive.on('login', function(context){
     });
 
     water.once('accepted', function(response){
-        water.GetState();;
+        water.GetState();
     });
 
     // Set the hot water to scheduled
     water.SetState(water.Mode.Schedule);
+    hive.Logout();
 });
 ```
 If successful you will see the response in the console.
@@ -184,12 +284,40 @@ If successful you will see the response in the console.
   available: [ 'SCHEDULE', 'MANUAL', 'BOOST', 'OFF' ] }
 Connection Closed
 ```
-### Temperature History
+** Events **
+* accepted - The update has been accepted
+
+
+* not_authorised - Incorrect user name or password
+* session_timout - The current session has expired
+* rate_limit - Requests to the API are rate limited
+* not_available - Remote server is not responding
+* error - Something broke! Check the error response object
+
+Parameters
+
+* `Mode.Off` - Hot water is off.
+* `Mode.Manual`
+* `Mode.Schedule` - On pre-programmed scheduled timer.
+* `Mode.Boost` - Turn on hot water for one hour.
+
+## Temperature History
+
+Use the Temperature object to get temperature data recorded by the thermostat over a defined period. In the following example the current days temperature history data is requested.
 
 ```javascript
 var Temperature = require('bg-hive-api/temperature');
+...
+hive.on('login', function(context){
+    var temperature = new Temperature(context);
+});
+
 ```
-Use the Temperature object to get temperature data recorded by the thermostat over a defined period. In the following example the current days temperature history data is requested.
+
+### `GetState()`
+
+
+Get the temperature history recorded by the thermostat over a defined period.
 
 ```javascript
 // on successful login this event handler is called
@@ -224,32 +352,26 @@ A successful request will display the temperature data in the console.
   temperatureUnit: 'C' }
 Connection Closed
 ```
+** Events **
+* completed - The request was completed sucessfully
 
-<a name="Events" />
-## Events
 
-### Success events
+* not_authorised - Incorrect user name or password
+* session_timout - The current session has expired
+* rate_limit - Requests to the API are rate limited
+* not_available - Remote server is not responding
+* error - Something broke! Check the error response object
 
-* complete - Returns response object with the product of the request.
-* accepted - Called once a `set` request has changed system state successfully.
+**Parameters**
 
-### Error events
+* `Period.Hour`
+* `Period.Day`
+* `Period.Week`
+* `Period.Month`
+* `Period.Year`
 
-**Authentication Errors**
 
-* not_authorised - Incorrect user name or password. Returns :- `error`
-* locked - Account was locked after 5 failed log in attempts. Returns :- `error`
-* invalid - Invalid login attempt. Returns :- `error`
-* session_timout - The current session has expired. Typically after 20 minutes.
-
-**General Errors**
-
-* not_available - The requested action is not available or not supported.
-* invalid - The requested action was invalid, typically thrown after passing a bad parameter value.
-* service_unavailable - Remote service is not available, possibly caused by too many consecutive requests.
-* error - Unknown error condition. Return the error object.
-
-### Event Handling
+## Event Handling
 
 It's generally easier and clearer to create separate handler functions to handle events for each controller object as in the following pattern.
 
@@ -299,7 +421,7 @@ function HotWaterEventHandler(controller) {
 
 ...
 hive.on('login', function(context){
-    var climate = new HotWaterControl(context);
+    var climate = new ClimateControl(context);
     var hotwater = new HotWaterControl(context);
 
     HotWaterEventHandler(hotwater);
@@ -311,190 +433,3 @@ hive.on('login', function(context){
 ...
 
 ```
-
-<a name="Reference" />
-## Reference
-
-<a name="Ref-Hive" />
-### Hive(username, password, api)
-
-```javascript
-var Hive = require('bg-hive-api');
-var hive = new Hive(username, password, api);
-```
-
-**Parameters**
-
-*username* -
-This will be the same name you use to login into the hive website.
-
-*password* -
-Corresponding password you use to authenticate.
-
-*api [optional]* - String value can be either 'Hive' or 'AlertMe'. Defaults to 'HIve'. This parameter specifies the url of the backend rest api.
-
-### Methods
-
-#### Login()
-
-Opens an http connection and authenticates with the remote server.
-
-**Parameters**
-
-*none*
-
-**Events**
-
-* login - On Success. Returns :- Connection `context` object.
-
-#### Logout()
-
-Clears all pending tasks from the command queue, and closes the http connection.
-
-**Parameters**
-
-*none*
-
-**Events**
-
-* logout - On Success.
-
-<a name="Ref-Heating" />
-### ClimateControl(`context`)
-
-```javascript
-var ClimateControl = require('bg-hive-api/climateControl');
-...
-hive.on('login', function(context){
-    var climate = new ClimateControl(context);
-});
-
-```
-
-### Methods
-
-#### GetState()
-
-Return the current state of the heating system.
-
-**Parameters**
-
-*none*
-
-**Events**
-
-* complete - On Complete. Returns :- `response` object.
-
-#### SetState(`Mode`)
-
-Set the current state of the heating system.
-
-**Parameters**
-
-* `ClimateControl.Mode.Off` - Frost protection.
-* `ClimateControl.Mode.Manual` - Maintain the current target temperature.
-* `ClimateControl.Mode.Schedule` - On scheduled timer.
-* `ClimateControl.Mode.Override` - Maintain target temperature until next scheduled event.
-
-**Events**
-
-* accepted - New state has been set.
-
-#### TargetTemperature(`temperature`)
-
-Set the desired target temperature.
-
-**Parameters**
-
-* `temperature` - Numeric temperature value in C
-
-**Events**
-
-* accepted - New temperature has been set.
-
-#### GetSchedule()
-
-Request the programmed schedule.
-
-**Parameters**
-
-*none*
-
-**Events**
-
-* complete - On Complete. Returns :- `response` object.
-
-<a name="Ref-HotWater" />
-### HotWaterControl(`context`)
-
-```javascript
-var HotWaterControl = require('bg-hive-api/hotWaterControl');
-...
-Hive.on('login', function(context){
-    var hotwater = new HotWaterControl(context);
-});
-```
-
-### Methods
-
-#### GetState()
-
-Return the current state of the hot water system.
-
-**Parameters**
-
-*none*
-
-**Events**
-
-* complete - On Complete. Returns :- `response` object.
-
-#### SetState(`Mode`)
-
-Set the current state of the heating system.
-
-**Parameters**
-
-* `HotWaterControl.Mode.Schedule` - On pre-programmed scheduled timer.
-* `HotWaterControl.Mode.Boost` - Turn on hot water for one hour.
-
-**Events**
-
-* accepted - New state has been set.
-
-
-#### GetSchedule()
-
-Request the programmed schedule.
-
-**Parameters**
-
-*none*
-
-**Events**
-
-* complete - On Complete. Returns :- `response` object.
-
-<a name="Ref-Temp" />
-### Temperature(`context`)
-
-Temperature history.
-
-```javascript
-var Temperature = require('bg-hive-api/temperature');
-...
-hive.on('login', function(context){
-    var temperature = new Temperature(context);
-});
-
-```
-
-### Methods
-
-#### GetState(`period`)
-
-Get the temperature history recorded by the thermostat over a defined period.
-
-**Parameters**
-
-`Temperature.Period.Hour`, `Temperature.Period.Day`, `Temperature.Period.Week`, `Temperature.Period.Month`, `Temperature.Period.Year`
