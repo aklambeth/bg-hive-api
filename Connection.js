@@ -44,7 +44,8 @@ module.exports.command = async.queue(function (task, callback) {
         jar:module.exports.context.authToken,
         form: undefined,
         method: undefined,
-        qs:undefined
+        qs:undefined,
+        strictSSL:false
     };
 
     if (typeof task == 'object') {
