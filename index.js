@@ -11,7 +11,7 @@ var config = {
     },
 
     api : {
-        "Hive": "https://api.bgchlivehome.co.uk/v5",
+        "Hive": "https://api.prod.bgchprod.info/api",
         "AlertMe" : "https://api.alertme.com/v5"
     }
 }
@@ -65,7 +65,7 @@ Hive.prototype.Login = function() {
             POST:{
                 "username": config.credentials.username,
                 "password": config.credentials.password,
-                "caller": "HiveHome"
+                "caller": "Web"
             }
         }
     }

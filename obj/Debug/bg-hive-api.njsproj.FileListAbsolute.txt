@@ -1,0 +1,2 @@
+C:\Users\adria\Documents\Visual Studio 2015\Projects\bg-hive-api\obj\Debug\bg-hive-api.njsprojResolveAssemblyReference.cache
+C:\Users\adria\Documents\Visual Studio 2015\Projects\bg-hive-api\bin\Microsoft.NodejsTools.WebRole.dll
