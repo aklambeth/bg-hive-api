@@ -4,8 +4,8 @@ var request = require('request');
 var async = require("async");
 
 module.exports.context = {
-    domain:"https://api.prod.bgchprod.info/api",
-    headers:{'User-Agent': 'bg-hive-api/1.0.5'},
+    domain:"https://api.bgchlivehome.co.uk/v5",
+    headers:{'User-Agent': 'bg-hive-api/1.0.4'},
     username:undefined,
     authToken:undefined,
     hubs:[{
@@ -44,8 +44,7 @@ module.exports.command = async.queue(function (task, callback) {
         jar:module.exports.context.authToken,
         form: undefined,
         method: undefined,
-        qs: undefined,
-        strictSSL: false
+        qs:undefined
     };
 
     if (typeof task == 'object') {
