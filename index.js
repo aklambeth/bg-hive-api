@@ -11,7 +11,7 @@ var config = {
     },
 
     api : {
-        "Hive": "https://api.prod.bgchprod.info/api",
+        "Hive": "https://api-prod.bgchprod.info/api",
         "AlertMe" : "https://api.alertme.com/v5"
     }
 }
