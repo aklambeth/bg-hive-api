@@ -1,4 +1,7 @@
 node_modules/
+bin/
+obj/
+typings/
 bg-hive-api.iml
 bg-hive-api.ipr
 bg-hive-api.iws
